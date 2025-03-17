@@ -7,8 +7,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:LauncherApp.ViewModels"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:local="using:LauncherApp"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <!-- String to Visibility Converter -->
+        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -115,9 +121,4 @@
             <ProgressRing x:Name="LoadingIndicator" Grid.Column="1" IsActive="False" Width="20" Height="20" />
         </Grid>
     </Grid>
-
-    <Page.Resources>
-        <!-- String to Visibility Converter -->
-        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
-    </Page.Resources>
 </Page>
