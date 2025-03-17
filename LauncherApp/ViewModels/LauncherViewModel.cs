@@ -52,7 +52,7 @@ namespace LauncherApp.ViewModels
         }
 
         [RelayCommand]
-        private async Task LoadItemsAsync()
+        public async Task LoadItemsAsync() // private から public に変更
         {
             try
             {
@@ -93,7 +93,7 @@ namespace LauncherApp.ViewModels
         }
 
         [RelayCommand]
-        private async Task SaveItemsAsync()
+        public async Task SaveItemsAsync() // private から public に変更
         {
             try
             {
