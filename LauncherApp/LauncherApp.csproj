@@ -12,19 +12,19 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- 追加: 明示的にバージョン設定 -->
+    <!-- 明示的にバージョン設定 -->
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="app.manifest" />
-    <None Remove="SampleData\sample_items.json" />
   </ItemGroup>
 
+  <!-- サンプルデータファイルを確実に出力ディレクトリにコピー -->
   <ItemGroup>
     <Content Include="SampleData\sample_items.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
