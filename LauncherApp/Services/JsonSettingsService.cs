@@ -47,7 +47,8 @@ namespace LauncherApp.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading launch items");
-                return new List<LaunchItem>();
+                // エラー時にはサンプルデータを読み込むよう変更
+                return await LoadSampleLaunchItemsAsync();
             }
         }
 
@@ -116,35 +117,134 @@ namespace LauncherApp.Services
         }
 
         /// <summary>
-        /// Load sample data for demonstration purposes
+        /// サンプルデータの読み込み方法を修正
         /// </summary>
         private async Task<IEnumerable<LaunchItem>> LoadSampleLaunchItemsAsync()
         {
+            List<LaunchItem> sampleItems = new List<LaunchItem>();
+            
             try
             {
-                // Load sample data from embedded resource or file
-                var sampleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///SampleData/sample_items.json"));
-                var json = await FileIO.ReadTextAsync(sampleFile);
+                // 複数の方法を試して、サンプルデータを読み込む
+                string jsonContent = null;
                 
-                var items = JsonSerializer.Deserialize<List<LaunchItem>>(json, _jsonOptions);
-                _logger.LogInformation("Loaded {Count} sample items", items?.Count ?? 0);
+                // 方法1: ms-appx URI を使用
+                try
+                {
+                    var uri = new Uri("ms-appx:///SampleData/sample_items.json");
+                    var file = await StorageFile.GetFileFromApplicationUriAsync(uri);
+                    jsonContent = await FileIO.ReadTextAsync(file);
+                    _logger.LogInformation("サンプルデータをms-appx URIから読み込みました");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "ms-appx URIからの読み込みに失敗しました");
+                }
                 
-                return items ?? new List<LaunchItem>();
+                // 方法2: インストールフォルダから直接読み込み
+                if (string.IsNullOrEmpty(jsonContent))
+                {
+                    try
+                    {
+                        var installFolder = Windows.ApplicationModel.Package.Current.InstalledLocation;
+                        var file = await installFolder.GetFileAsync("SampleData\\sample_items.json");
+                        jsonContent = await FileIO.ReadTextAsync(file);
+                        _logger.LogInformation("サンプルデータをインストールフォルダから読み込みました");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "インストールフォルダからの読み込みに失敗しました");
+                    }
+                }
+                
+                // 方法3: 実行フォルダから読み込み
+                if (string.IsNullOrEmpty(jsonContent))
+                {
+                    try
+                    {
+                        string executablePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                        string filePath = Path.Combine(executablePath, "SampleData", "sample_items.json");
+                        jsonContent = File.ReadAllText(filePath);
+                        _logger.LogInformation("サンプルデータを実行フォルダから読み込みました: {path}", filePath);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "実行フォルダからの読み込みに失敗しました");
+                    }
+                }
+
+                // データをデシリアライズ
+                if (!string.IsNullOrEmpty(jsonContent))
+                {
+                    sampleItems = JsonSerializer.Deserialize<List<LaunchItem>>(jsonContent, _jsonOptions);
+                    _logger.LogInformation("サンプルデータを正常に読み込みました: {count} アイテム", sampleItems?.Count ?? 0);
+                }
+                else
+                {
+                    // どの方法でも読み込めなかった場合は、ハードコードされたサンプルデータを使用
+                    _logger.LogWarning("ファイルからサンプルデータを読み込めなかったため、デフォルトデータを使用します");
+                    sampleItems = CreateDefaultSampleItems();
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading sample data");
-                return new List<LaunchItem>
-                {
-                    new LaunchItem
-                    {
-                        Name = "メモ帳",
-                        ApplicationPath = "C:\\Windows\\notepad.exe",
-                        Category = "Windows標準",
-                        Description = "テキストエディタ"
-                    }
-                };
+                _logger.LogError(ex, "サンプルデータ読み込み中にエラーが発生しました");
+                sampleItems = CreateDefaultSampleItems();
             }
+            
+            return sampleItems;
+        }
+        
+        /// <summary>
+        /// デフォルトのサンプルアイテムを作成
+        /// </summary>
+        private List<LaunchItem> CreateDefaultSampleItems()
+        {
+            return new List<LaunchItem>
+            {
+                new LaunchItem
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "メモ帳",
+                    IconPath = "",
+                    ApplicationPath = "C:\\Windows\\notepad.exe",
+                    CommandLineArgs = "",
+                    WorkingDirectory = "C:\\Windows",
+                    DisplayOrder = 0,
+                    Category = "Windows標準",
+                    Description = "テキストエディタ",
+                    LastLaunched = DateTime.Now.AddDays(-1),
+                    LaunchCount = 5
+                },
+                new LaunchItem
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "電卓",
+                    IconPath = "",
+                    ApplicationPath = "C:\\Windows\\System32\\calc.exe",
+                    CommandLineArgs = "",
+                    WorkingDirectory = "C:\\Windows\\System32",
+                    DisplayOrder = 1,
+                    Category = "Windows標準",
+                    Description = "計算機",
+                    LastLaunched = DateTime.Now.AddDays(-2),
+                    LaunchCount = 8
+                },
+                new LaunchItem
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "コマンドプロンプト",
+                    IconPath = "",
+                    ApplicationPath = "C:\\Windows\\System32\\cmd.exe",
+                    CommandLineArgs = "",
+                    WorkingDirectory = "C:\\Windows\\System32",
+                    DisplayOrder = 2,
+                    Category = "開発ツール",
+                    Description = "コマンドライン",
+                    LastLaunched = DateTime.Now.AddHours(-5),
+                    LaunchCount = 12
+                }
+            };
         }
     }
 }
