@@ -52,8 +52,9 @@ namespace LauncherApp.ViewModels
             _logger = logger;
         }
 
+        // 修正：RelayCommand を維持しつつ、メソッドを public に変更
         [RelayCommand]
-        private async Task LoadSettingsAsync()
+        public async Task LoadSettingsAsync()
         {
             try
             {
@@ -88,8 +89,9 @@ namespace LauncherApp.ViewModels
             }
         }
 
+        // 修正：RelayCommand を維持しつつ、メソッドを public に変更
         [RelayCommand]
-        private async Task SaveSettingsAsync()
+        public async Task SaveSettingsAsync()
         {
             try
             {
