@@ -1,4 +1,5 @@
 using LauncherApp.Services;
+using LauncherApp.ViewModels;
 using LauncherApp.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,8 +40,8 @@ namespace LauncherApp
             services.AddSingleton<IDialogService, DialogService>();
 
             // Register ViewModels
-            // services.AddTransient<LauncherViewModel>();
-            // services.AddTransient<SettingsViewModel>();
+            services.AddTransient<LauncherViewModel>();
+            services.AddTransient<SettingsViewModel>();
 
             // Register logging
             services.AddLogging(configure =>
