@@ -6,6 +6,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LauncherApp.Views
 {
@@ -20,22 +22,28 @@ namespace LauncherApp.Views
 
             // Get dependencies
             var services = App.Current.Services;
-            _logger = services.GetService<ILogger<LauncherPage>>();
+            _logger = services.GetRequiredService<ILogger<LauncherPage>>();
             
-            // Initialize ViewModel
-            _viewModel = new LauncherViewModel(
-                services.GetService<ISettingsService>(),
-                services.GetService<ILauncherService>(),
-                services.GetService<IDialogService>(),
-                services.GetService<ILogger<LauncherViewModel>>());
+            try
+            {
+                // Initialize ViewModel
+                _viewModel = new LauncherViewModel(
+                    services.GetRequiredService<ISettingsService>(),
+                    services.GetRequiredService<ILauncherService>(),
+                    services.GetRequiredService<IDialogService>(),
+                    services.GetRequiredService<ILogger<LauncherViewModel>>());
 
-            // Bind ViewModel
-            DataContext = _viewModel;
-
-            // Bind properties
-            SearchBox.Text = _viewModel.SearchText;
-            CategoryComboBox.ItemsSource = _viewModel.Categories;
-            ItemsGridView.ItemsSource = _viewModel.FilteredItems;
+                // Explicitly set DataContext
+                this.DataContext = _viewModel;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error initializing ViewModel: {ex.Message}");
+                if (_logger != null)
+                {
+                    _logger.LogError(ex, "Error initializing ViewModel");
+                }
+            }
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -47,10 +55,15 @@ namespace LauncherApp.Views
                 // Load data
                 StatusTextBlock.Text = "データを読み込んでいます...";
                 LoadingIndicator.IsActive = true;
+                
+                // Load items
                 await _viewModel.LoadItemsAsync();
                 
-                // Update UI
-                UpdateUIFromViewModel();
+                // Initialize UI
+                SetupUI();
+                
+                // Update status
+                StatusTextBlock.Text = $"{_viewModel.LaunchItems.Count} アイテムを読み込みました";
             }
             catch (Exception ex)
             {
@@ -62,6 +75,24 @@ namespace LauncherApp.Views
                 LoadingIndicator.IsActive = false;
             }
         }
+        
+        private void SetupUI()
+        {
+            // Bind the GridView to the filtered items
+            ItemsGridView.ItemsSource = _viewModel.FilteredItems;
+            
+            // Bind the search box
+            SearchBox.Text = _viewModel.SearchText;
+            
+            // Setup the category combo box
+            CategoryComboBox.ItemsSource = _viewModel.Categories;
+            
+            // Debugging: Print loaded items to debug output
+            foreach (var item in _viewModel.LaunchItems)
+            {
+                System.Diagnostics.Debug.WriteLine($"Loaded item: {item.Name}, Path: {item.ApplicationPath}");
+            }
+        }
 
         private async void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
@@ -70,6 +101,7 @@ namespace LauncherApp.Views
                 StatusTextBlock.Text = "更新中...";
                 LoadingIndicator.IsActive = true;
                 await _viewModel.LoadItemsAsync();
+                SetupUI();
                 UpdateUIFromViewModel();
             }
             catch (Exception ex)
@@ -113,7 +145,7 @@ namespace LauncherApp.Views
         private void CategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var comboBox = sender as ComboBox;
-            _viewModel.SelectedCategory = comboBox.SelectedItem as string ?? string.Empty;
+            _viewModel.SelectedCategory = comboBox?.SelectedItem as string ?? string.Empty;
             UpdateFilteredItems();
         }
 
@@ -157,8 +189,11 @@ namespace LauncherApp.Views
         private void UpdateFilteredItems()
         {
             // Update GridView
+            var filteredItems = _viewModel.FilteredItems?.ToList();
+            System.Diagnostics.Debug.WriteLine($"Filtered items count: {filteredItems?.Count ?? 0}");
+            
             ItemsGridView.ItemsSource = null;
-            ItemsGridView.ItemsSource = _viewModel.FilteredItems;
+            ItemsGridView.ItemsSource = filteredItems;
         }
     }
 }
