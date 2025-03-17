@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="LauncherApp.Views.EditItemDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="アイテムの編集"
+    PrimaryButtonText="保存"
+    SecondaryButtonText="キャンセル"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick"
+    MaxWidth="{StaticResource ContentDialogMaxWidth}"
+    MaxHeight="{StaticResource ContentDialogMaxHeight}">
+
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="0,12">
+            <!-- アプリケーション名 -->
+            <TextBox x:Name="NameTextBox" Header="アプリケーション名" PlaceholderText="例: メモ帳" />
+
+            <!-- アイコン選択 -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <TextBox x:Name="IconPathTextBox" 
+                         Header="アイコン" 
+                         PlaceholderText="デフォルト" 
+                         IsReadOnly="True" />
+                <Button x:Name="BrowseIconButton" 
+                        Content="参照" 
+                        Grid.Column="1" 
+                        VerticalAlignment="Bottom" 
+                        Margin="8,0,0,0" 
+                        Click="BrowseIconButton_Click" />
+            </Grid>
+
+            <!-- 実行ファイルパス -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <TextBox x:Name="ApplicationPathTextBox" 
+                         Header="実行ファイルパス" 
+                         PlaceholderText="例: C:\Windows\notepad.exe" 
+                         IsReadOnly="True" />
+                <Button x:Name="BrowseAppButton" 
+                        Content="参照" 
+                        Grid.Column="1" 
+                        VerticalAlignment="Bottom" 
+                        Margin="8,0,0,0" 
+                        Click="BrowseAppButton_Click" />
+            </Grid>
+
+            <!-- コマンドライン引数 -->
+            <TextBox x:Name="CommandLineArgsTextBox" Header="コマンドライン引数" PlaceholderText="例: /p c:\example.txt" />
+
+            <!-- 作業ディレクトリ -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <TextBox x:Name="WorkingDirectoryTextBox" 
+                         Header="作業ディレクトリ" 
+                         PlaceholderText="例: C:\Users\Documents" 
+                         IsReadOnly="True" />
+                <Button x:Name="BrowseWorkingDirButton" 
+                        Content="参照" 
+                        Grid.Column="1" 
+                        VerticalAlignment="Bottom" 
+                        Margin="8,0,0,0" 
+                        Click="BrowseWorkingDirButton_Click" />
+            </Grid>
+
+            <!-- カテゴリ -->
+            <TextBox x:Name="CategoryTextBox" Header="カテゴリ" PlaceholderText="例: オフィス" />
+
+            <!-- 説明 -->
+            <TextBox x:Name="DescriptionTextBox" 
+                     Header="説明" 
+                     PlaceholderText="このアプリケーションの説明..." 
+                     AcceptsReturn="True" 
+                     TextWrapping="Wrap" 
+                     MinHeight="80" />
+
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>
