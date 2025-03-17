@@ -23,7 +23,8 @@ namespace LauncherApp
             SetTitleBar(AppTitleBar);
 
             // Get AppWindow object
-            var windowNative = this.As<IWindowNative>();
+            // 修正: As<T>() の呼び出し方法を変更
+            var windowNative = WinRT.CastExtensions.As<IWindowNative>(this);
             var windowHandle = windowNative.WindowHandle;
             var windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
             _appWindow = AppWindow.GetFromWindowId(windowId);
@@ -34,7 +35,8 @@ namespace LauncherApp
 
         private void SetWindowSize(int width, int height)
         {
-            var windowNative = this.As<IWindowNative>();
+            // 修正: As<T>() の呼び出し方法を変更
+            var windowNative = WinRT.CastExtensions.As<IWindowNative>(this);
             var windowHandle = windowNative.WindowHandle;
             var windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
             _appWindow = AppWindow.GetFromWindowId(windowId);
