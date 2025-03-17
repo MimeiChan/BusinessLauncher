@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -33,8 +34,8 @@ namespace LauncherApp.Services
 
                 if (file == null)
                 {
-                    _logger.LogInformation("Launch items file not found. Returning empty collection.");
-                    return new List<LaunchItem>();
+                    _logger.LogInformation("Launch items file not found. Loading sample data.");
+                    return await LoadSampleLaunchItemsAsync();
                 }
 
                 var json = await FileIO.ReadTextAsync(file);
@@ -111,6 +112,38 @@ namespace LauncherApp.Services
             {
                 _logger.LogError(ex, "Error saving app settings");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Load sample data for demonstration purposes
+        /// </summary>
+        private async Task<IEnumerable<LaunchItem>> LoadSampleLaunchItemsAsync()
+        {
+            try
+            {
+                // Load sample data from embedded resource or file
+                var sampleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///SampleData/sample_items.json"));
+                var json = await FileIO.ReadTextAsync(sampleFile);
+                
+                var items = JsonSerializer.Deserialize<List<LaunchItem>>(json, _jsonOptions);
+                _logger.LogInformation("Loaded {Count} sample items", items?.Count ?? 0);
+                
+                return items ?? new List<LaunchItem>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading sample data");
+                return new List<LaunchItem>
+                {
+                    new LaunchItem
+                    {
+                        Name = "メモ帳",
+                        ApplicationPath = "C:\\Windows\\notepad.exe",
+                        Category = "Windows標準",
+                        Description = "テキストエディタ"
+                    }
+                };
             }
         }
     }
