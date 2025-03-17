@@ -76,6 +76,18 @@
                                     FontSize="32" 
                                     VerticalAlignment="Center" 
                                     HorizontalAlignment="Center" />
+
+                                <!-- カテゴリ表示 (オプション) -->
+                                <Border Background="{ThemeResource AccentFillColorDefaultBrush}" 
+                                        CornerRadius="4"
+                                        Padding="4,2"
+                                        VerticalAlignment="Top"
+                                        HorizontalAlignment="Right"
+                                        Visibility="{x:Bind Category, Converter={StaticResource StringToVisibilityConverter}}">
+                                    <TextBlock Text="{x:Bind Category}" 
+                                               FontSize="10"
+                                               Foreground="White" />
+                                </Border>
                             </Grid>
 
                             <!-- App Name -->
@@ -103,4 +115,9 @@
             <ProgressRing x:Name="LoadingIndicator" Grid.Column="1" IsActive="False" Width="20" Height="20" />
         </Grid>
     </Grid>
+
+    <Page.Resources>
+        <!-- String to Visibility Converter -->
+        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+    </Page.Resources>
 </Page>
